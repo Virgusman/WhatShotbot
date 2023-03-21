@@ -17,12 +17,14 @@ async def process_start_command(message: Message):
         db.add_user(message.from_user.id, message.from_user.full_name)
         await message.answer(text=LEXICON['hello first'], reply_markup=main_kb)
     else:
-        await message.answer(text=message.from_user.full_name + LEXICON['hello again'], reply_markup=main_kb)
+        await message.answer(text=message.from_user.full_name + LEXICON['hello again'], reply_markup=admin_kb if db.getAccess(message.from_user.id) else main_kb)
+
 
 #Нажатие на клавишу Играть
 @router.message(Text(text=LEXICON['play']))
 async def process_play(message: Message):
-    pass
+    print("нажата кнопка")
+
 
 #Нажатие на клавишу Справка
 @router.message(Text(text=LEXICON['faq']))
@@ -34,6 +36,14 @@ async def process_faq(message: Message):
 async def process_check(message: Message):
     pass
 
+@router.message(F.photo)
+async def take_photo(message: Message):
+    if message.caption == None:
+        await message.answer(LEXICON['not_caption'])
+    else:
+        db.newShot(message.photo[-1].file_id, message.caption)
+        await message.answer(LEXICON['addShot'])
+
 #Ввод любого текста/ответа-названия фильма
 @router.message(Text)
 async def process(message: Message):
@@ -41,9 +51,7 @@ async def process(message: Message):
     
     
 
-@router.message(F.photo)
-async def take_photo(message: Message):
-    pass
+
 
 
 
