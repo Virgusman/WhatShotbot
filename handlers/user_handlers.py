@@ -1,10 +1,10 @@
 
-from aiogram import Router, F, Bot
-from aiogram.filters import Command, CommandStart, Text
+from aiogram import Router, F
+from aiogram.filters import CommandStart, Text
 from aiogram.types import Message
 from lexicon.lexicon import LEXICON
 from database import db
-from keyboards.keyboards import main_kb,admin_kb
+from keyboards.keyboards import main_kb, admin_kb, ingame_gb, adminingame_gb
 
 
 router: Router = Router()
@@ -23,7 +23,14 @@ async def process_start_command(message: Message):
 #Нажатие на клавишу Играть
 @router.message(Text(text=LEXICON['play_button']))
 async def process_play(message: Message):
-    pass
+    shot = db.get_shot(message.from_user.id)
+    if shot:
+
+        await message.answer_photo(photo= shot[1],
+                                        caption= LEXICON['caption_forgame'], 
+                                        reply_markup= adminingame_gb if db.getAccess(message.from_user.id) else ingame_gb)
+    else:
+        await message.answer(LEXICON['Shot_notforgame'])
 
 
 #Нажатие на клавишу Справка
@@ -31,7 +38,7 @@ async def process_play(message: Message):
 async def process_faq(message: Message):
     pass
 
-
+#Получение нового кадра от пользователя
 @router.message(F.photo)
 async def take_photo(message: Message):
     if message.caption == None:

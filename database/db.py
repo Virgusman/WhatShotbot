@@ -1,4 +1,5 @@
 import sqlite3
+import random
 
 #Функции для работы с базой данных.
 
@@ -18,11 +19,11 @@ def find_user(id):
 def add_user(id, name):
     conn = sqlite3.connect('database\WhatShot_database.db') 
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO Users (id_user,name,access,status,points) VALUES (?,?,?,?,?)', (id, name, "User", "not game", 0,))
+    cursor.execute('INSERT INTO Users (id_user,name,access,status,points) VALUES (?,?,?,?,?)', (id, name, "User", 0, 0,))
     conn.commit()
     conn.close()
 
-#Проверка статуса на
+#Проверка админского доступа
 def getAccess(id):
     conn = sqlite3.connect('database\WhatShot_database.db') 
     cursor = conn.cursor()
@@ -47,3 +48,31 @@ def check_shot():
     shot = cursor.fetchone()
     conn.close()
     return shot
+
+#Смена статуса кадра на "ок"
+def shot_ok(id_shot):
+    conn = sqlite3.connect('database\WhatShot_database.db') 
+    cursor = conn.cursor()
+    cursor.execute('UPDATE Shots SET status = "ok" WHERE id_shot = (?)', (id_shot,))
+    conn.commit()
+    conn.close()
+
+#Удаление кадра
+def shot_del(id_shot):
+    conn = sqlite3.connect('database\WhatShot_database.db') 
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM Shots WHERE id_shot = (?)', (id_shot,))
+    conn.commit()
+    conn.close()
+
+#Получение кадра для игры
+def get_shot(id_user):
+    conn = sqlite3.connect('database\WhatShot_database.db') 
+    cursor = conn.cursor()
+    cursor.execute("""SELECT id_shot, Shot_token 
+                   FROM Shots WHERE status = "ok" 
+                   AND id_shot NOT IN
+                   (SELECT id_shot FROM passed_shots WHERE id_user = (?))""", (id_user,))
+    shots = cursor.fetchall()
+    conn.close()
+    return random.choice(shots)
