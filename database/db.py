@@ -38,3 +38,12 @@ def newShot(token,answer):
     cursor.execute('INSERT INTO Shots (Shot_token,answer,status) VALUES (?,?,?)', (token, answer, "new",))
     conn.commit()
     conn.close()
+
+#Получение кадра для проверки
+def check_shot():
+    conn = sqlite3.connect('database\WhatShot_database.db') 
+    cursor = conn.cursor()
+    cursor.execute('SELECT id_shot, Shot_token, answer FROM Shots WHERE status = "new"')
+    shot = cursor.fetchone()
+    conn.close()
+    return shot

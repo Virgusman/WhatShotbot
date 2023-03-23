@@ -21,20 +21,16 @@ async def process_start_command(message: Message):
 
 
 #Нажатие на клавишу Играть
-@router.message(Text(text=LEXICON['play']))
+@router.message(Text(text=LEXICON['play_button']))
 async def process_play(message: Message):
-    print("нажата кнопка")
+    pass
 
 
 #Нажатие на клавишу Справка
-@router.message(Text(text=LEXICON['faq']))
+@router.message(Text(text=LEXICON['faq_button']))
 async def process_faq(message: Message):
     pass
 
-#Нажатие на клавишу Проверить кадры
-@router.message(Text(text=LEXICON['check']))
-async def process_check(message: Message):
-    pass
 
 @router.message(F.photo)
 async def take_photo(message: Message):
