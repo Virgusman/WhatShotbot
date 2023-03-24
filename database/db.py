@@ -73,6 +73,21 @@ def get_shot(id_user):
                    FROM Shots WHERE status = "ok" 
                    AND id_shot NOT IN
                    (SELECT id_shot FROM passed_shots WHERE id_user = (?))""", (id_user,))
-    shots = cursor.fetchall()
+    shot = random.choice(cursor.fetchall())
+    if shot:
+        cursor.execute('UPDATE Users SET status = (?) WHERE id_user = (?)', (shot[0], id_user,))
+        conn.commit()
     conn.close()
-    return random.choice(shots)
+    return shot
+
+#Получение загаданного фильма пользователю
+def get_answer(id_user):
+    conn = sqlite3.connect('database\WhatShot_database.db') 
+    cursor = conn.cursor()
+    cursor.execute('SELECT status FROM Users WHERE id_user = (?)', (id_user, ))
+    answer = cursor.fetchone()
+    if answer[0] != 0:
+        cursor.execute('SELECT answer FROM Shots WHERE id_shot = (?)', (answer[0], ))
+        answer = cursor.fetchone()
+    conn.close()
+    return answer[0]

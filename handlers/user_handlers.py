@@ -16,8 +16,12 @@ async def process_start_command(message: Message):
     if not db.find_user(message.chat.id):
         db.add_user(message.from_user.id, message.from_user.full_name)
         await message.answer(text=LEXICON['hello first'], reply_markup=main_kb)
+    elif db.get_answer(message.from_user.id) != 0:
+        await message.answer(text= message.from_user.full_name + LEXICON['hello in game'], 
+                             reply_markup= adminingame_gb if db.getAccess(message.from_user.id) else ingame_gb)
     else:
-        await message.answer(text=message.from_user.full_name + LEXICON['hello again'], reply_markup=admin_kb if db.getAccess(message.from_user.id) else main_kb)
+        await message.answer(text=message.from_user.full_name + LEXICON['hello again'], 
+                             reply_markup=admin_kb if db.getAccess(message.from_user.id) else main_kb)
 
 
 #Нажатие на клавишу Играть
@@ -25,7 +29,6 @@ async def process_start_command(message: Message):
 async def process_play(message: Message):
     shot = db.get_shot(message.from_user.id)
     if shot:
-
         await message.answer_photo(photo= shot[1],
                                         caption= LEXICON['caption_forgame'], 
                                         reply_markup= adminingame_gb if db.getAccess(message.from_user.id) else ingame_gb)
@@ -38,18 +41,23 @@ async def process_play(message: Message):
 async def process_faq(message: Message):
     pass
 
+#Нажатие на клавишу Пропустить кадр
+@router.message(Text(text=LEXICON['skip']))
+async def process_skip(message: Message):
+    pass
+
 #Получение нового кадра от пользователя
 @router.message(F.photo)
 async def take_photo(message: Message):
     if message.caption == None:
         await message.answer(LEXICON['not_caption'])
     else:
-        db.newShot(message.photo[-1].file_id, message.caption)
+        db.newShot(message.photo[-1].file_id, message.caption.lower())
         await message.answer(LEXICON['addShot'])
 
 #Ввод любого текста/ответа-названия фильма
 @router.message(Text)
-async def process(message: Message):
+async def process_answer(message: Message):
     pass
     
     
