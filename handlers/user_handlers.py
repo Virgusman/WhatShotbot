@@ -5,6 +5,7 @@ from aiogram.types import Message
 from lexicon.lexicon import LEXICON
 from database import db
 from keyboards.keyboards import main_kb, admin_kb, ingame_gb, adminingame_gb
+from services.service import compare
 
 
 router: Router = Router()
@@ -39,12 +40,21 @@ async def process_play(message: Message):
 #Нажатие на клавишу Справка
 @router.message(Text(text=LEXICON['faq_button']))
 async def process_faq(message: Message):
-    pass
+    await message.answer(LEXICON['faq'] + str(db.get_points(message.from_user.id)) + "\n\nПо любым вопросам связанных с работой бота можно обратиться:\n@virgusman")
 
 #Нажатие на клавишу Пропустить кадр
 @router.message(Text(text=LEXICON['skip']))
 async def process_skip(message: Message):
-    pass
+    ans = db.get_answer(message.from_user.id)
+    db.skip_shot(message.from_user.id)
+    shot = db.get_shot(message.from_user.id)
+    if shot:
+        await message.answer_photo(photo= shot[1],
+                                    caption= f"<b>Прошлый кадр был из фильма: {ans}</b>\n\n{LEXICON['caption_forgame']}", 
+                                    reply_markup= adminingame_gb if db.getAccess(message.from_user.id) else ingame_gb)
+    else:
+        await message.answer(f"<b>Прошлый кадр был из фильма: {ans}</b>\n\n{LEXICON['Shot_notforgame']}", reply_markup=admin_kb if db.getAccess(message.from_user.id) else main_kb)
+
 
 #Получение нового кадра от пользователя
 @router.message(F.photo)
@@ -52,19 +62,23 @@ async def take_photo(message: Message):
     if message.caption == None:
         await message.answer(LEXICON['not_caption'])
     else:
-        db.newShot(message.photo[-1].file_id, message.caption.lower())
+        db.newShot(message.photo[-1].file_id, message.caption, message.from_user.id)
         await message.answer(LEXICON['addShot'])
 
 #Ввод любого текста/ответа-названия фильма
 @router.message(Text)
 async def process_answer(message: Message):
-    pass
-    
-    
-
-
-
-
-
-
-
+    if db.get_answer(message.from_user.id) != 0:
+        db.add_passed(message.from_user.id, message.text)    
+        if compare(db.get_answer(message.from_user.id), message.text):
+            db.win_shot(message.from_user.id)
+            shot = db.get_shot(message.from_user.id)
+            if shot:
+                await message.answer_photo(photo= shot[1],
+                                        caption= 'Правильно! Фильм отгадан!\n' + LEXICON['caption_forgame'], 
+                                        reply_markup= adminingame_gb if db.getAccess(message.from_user.id) else ingame_gb)
+            else:
+                await message.answer('Правильно! Фильм отгадан!\n' + LEXICON['Shot_notforgame'], reply_markup=admin_kb if db.getAccess(message.from_user.id) else main_kb)
+        else:
+            # db.not_win_shot(message.from_user.id)
+            await message.answer('Нет, ответ не верный. Попробуй еще или нажми "Пропустить кадр"')

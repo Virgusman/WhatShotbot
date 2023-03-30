@@ -22,7 +22,7 @@ async def process_check(message: Message):
 #Нажатие на Инлайн-кнопку "Кадр в игру"
 @router.callback_query(lambda x: 'ok' in x.data)
 async def process_shot_ok(callback: CallbackQuery):
-    db.shot_ok(int(callback.data[:-2]))
+    db.shot_ok(callback.message.chat.id, int(callback.data[:-2]))
     await callback.message.delete()
     photo = db.check_shot()
     if photo:
