@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, Bot
 from aiogram.filters import Text
 from aiogram.types import Message, CallbackQuery
 from lexicon.lexicon import LEXICON
@@ -21,7 +21,7 @@ async def process_check(message: Message):
 
 #Нажатие на Инлайн-кнопку "Кадр в игру"
 @router.callback_query(lambda x: 'ok' in x.data)
-async def process_shot_ok(callback: CallbackQuery):
+async def process_shot_ok(callback: CallbackQuery, bot: Bot):
     db.shot_ok(callback.message.chat.id, int(callback.data[:-2]))
     await callback.message.delete()
     photo = db.check_shot()
@@ -30,12 +30,16 @@ async def process_shot_ok(callback: CallbackQuery):
                                         caption= "Название фильма: " + photo[2] + "\nДобавить данный кадр в игру или удалить?", 
                                         reply_markup= create_editboard(photo[0]))
     else:
+        users = db.get_users_notgame()
+        for id in users:
+            if id[0] != callback.message.chat.id:
+                await bot.send_message(id[0], LEXICON['push_newshot'])
         await callback.message.answer('Новых кадров для проверки больше нет.')
     
 
 #Нажатие на Инлайн-кнопку "Удалить кадр"
 @router.callback_query(lambda x: 'del' in x.data)
-async def process_shot_not_ok(callback: CallbackQuery):
+async def process_shot_not_ok(callback: CallbackQuery, bot: Bot):
     db.shot_del(int(callback.data[:-3]))
     await callback.message.delete()
     photo = db.check_shot()
@@ -44,4 +48,8 @@ async def process_shot_not_ok(callback: CallbackQuery):
                                         caption= "Название фильма: " + photo[2] + "\nДобавить данный кадр в игру или удалить?", 
                                         reply_markup= create_editboard(photo[0]))
     else:
+        users = db.get_users_notgame()
+        for id in users:
+            if id[0] != callback.message.chat.id:
+                await bot.send_message(id[0], LEXICON['push_newshot'])
         await callback.message.answer('Новых кадров для проверки больше нет.')

@@ -40,7 +40,7 @@ async def process_play(message: Message):
 #Нажатие на клавишу Справка
 @router.message(Text(text=LEXICON['faq_button']))
 async def process_faq(message: Message):
-    await message.answer(LEXICON['faq'] + str(db.get_points(message.from_user.id)) + "\n\nПо любым вопросам связанных с работой бота можно обратиться:\n@virgusman")
+    await message.answer(LEXICON['faq'])
 
 #Нажатие на клавишу Пропустить кадр
 @router.message(Text(text=LEXICON['skip']))
@@ -54,6 +54,19 @@ async def process_skip(message: Message):
                                     reply_markup= adminingame_gb if db.getAccess(message.from_user.id) else ingame_gb)
     else:
         await message.answer(f"<b>Прошлый кадр был из фильма: {ans}</b>\n\n{LEXICON['Shot_notforgame']}", reply_markup=admin_kb if db.getAccess(message.from_user.id) else main_kb)
+
+#Нажатие на клавишу Рейтинг
+@router.message(Text(text=LEXICON['rating']))
+async def process_rating(message: Message):
+    points = db.get_top10()
+    text : str = f"<b>Вами набрано: {str(db.get_points(message.from_user.id))} балла(ов)</b>\n\n"
+    text += '<b>ТОП 10 игроков:</b>\n'
+    for i in range(10):
+        text += f"{str(i + 1)}. {points[i][0]}  - {str(points[i][1])} балла(ов)\n"
+    await message.answer(text)
+
+
+
 
 
 #Получение нового кадра от пользователя

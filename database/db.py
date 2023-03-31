@@ -156,6 +156,24 @@ def get_points(id_user):
     conn.close()
     return point[0]
 
+#Получить список ID пользователей не в игре
+def get_users_notgame():
+    conn = sqlite3.connect('database\WhatShot_database.db') 
+    cursor = conn.cursor()
+    cursor.execute('SELECT id_user FROM Users WHERE status = 0')
+    users = cursor.fetchall()
+    conn.close()
+    return users
+
+#Получить 10 лучших игроков
+def get_top10():
+    conn = sqlite3.connect('database\WhatShot_database.db') 
+    cursor = conn.cursor()
+    cursor.execute('SELECT name, points FROM Users ORDER BY points DESC LIMIT 10')
+    users = cursor.fetchall()
+    conn.close()
+    return users
+
 
 #Дан не правильный ответ
 # def not_win_shot(id_user):
