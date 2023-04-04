@@ -59,8 +59,8 @@ async def process_skip(message: Message):
 @router.message(Text(text=LEXICON['rating']))
 async def process_rating(message: Message):
     points = db.get_top10()
-    text : str = f"<b>Вами набрано: {str(db.get_points(message.from_user.id))} балла(ов)</b>\n\n"
-    text += '<b>ТОП 10 игроков:</b>\n'
+    text : str = f"<b>🏅 Вами набрано: {str(db.get_points(message.from_user.id))} балла(ов)</b>\n\n"
+    text += '<b>🏆 ТОП 10 игроков:</b>\n'
     for i in range(10):
         text += f"{str(i + 1)}. {points[i][0]}  - {str(points[i][1])} балла(ов)\n"
     await message.answer(text)
@@ -88,10 +88,9 @@ async def process_answer(message: Message):
             shot = db.get_shot(message.from_user.id)
             if shot:
                 await message.answer_photo(photo= shot[1],
-                                        caption= 'Правильно! Фильм отгадан!\n' + LEXICON['caption_forgame'], 
+                                        caption= '✅ Правильно! Фильм отгадан!\n\n' + LEXICON['caption_forgame'], 
                                         reply_markup= adminingame_gb if db.getAccess(message.from_user.id) else ingame_gb)
             else:
-                await message.answer('Правильно! Фильм отгадан!\n' + LEXICON['Shot_notforgame'], reply_markup=admin_kb if db.getAccess(message.from_user.id) else main_kb)
+                await message.answer('✅ Правильно! Фильм отгадан!\n\n' + LEXICON['Shot_notforgame'], reply_markup=admin_kb if db.getAccess(message.from_user.id) else main_kb)
         else:
-            # db.not_win_shot(message.from_user.id)
-            await message.answer('Нет, ответ не верный. Попробуй еще или нажми "Пропустить кадр"')
+            await message.answer('❌ Нет, ответ не верный. Попробуй еще или нажми "Пропустить кадр"')

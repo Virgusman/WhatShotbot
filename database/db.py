@@ -84,7 +84,6 @@ def get_shot(id_user):
                    FROM Shots WHERE status = "ok" 
                    AND id_shot NOT IN
                    (SELECT id_shot FROM passed_shots WHERE id_user = (?))""", (id_user,))
-    #shot = random.choice(cursor.fetchall())
     shot = cursor.fetchall()
     if shot:
         shot = random.choice(shot)
@@ -116,9 +115,6 @@ def skip_shot(id_user):
     point = cursor.fetchone()
     cursor.execute('UPDATE Users SET status = (?) WHERE id_user = (?)', (0, id_user,))
     conn.commit()
-    # if point[1] != 0:
-    #     cursor.execute('UPDATE Users SET points = (?) WHERE id_user = (?)', (point[1] - 1, id_user,))
-    #     conn.commit()
     cursor.execute('INSERT INTO passed_shots (id_user, id_shot) VALUES (?,?)', (id_user, point[0]))
     conn.commit()
     conn.close()
