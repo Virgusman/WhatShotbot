@@ -13,4 +13,4 @@ def compare(s1,s2 : str) -> bool:
         return False
     line1 = "".join(c for c in s1 if c.isalpha())
     line2 = "".join(c for c in s2 if c.isalpha())
-    return True if fuzz.ratio(line1.lower(),line2.lower()) >= 65 else False
+    return True if fuzz.ratio(line1.lower(),line2.lower()) >= 62 else False
